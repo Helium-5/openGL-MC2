@@ -17,11 +17,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
-// settings
+// screen size
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// camera
+// camera 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -34,14 +34,12 @@ float lastFrame = 0.0f;
 int main()
 {
     // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // glfw window creation
-    // --------------------
+    // window creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
@@ -54,27 +52,23 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    // tell GLFW to capture our mouse
+    // capture mouse movement
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
-    // configure global opengl state
-    // -----------------------------
+    // configuring global opengl state
     glEnable(GL_DEPTH_TEST);
 
-    // build and compile our shader zprogram
-    // ------------------------------------
+    // build and compile shader zprogram
     Shader ourShader("vshader.vs", "fshader.fs");
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
+    // set up vertex data and configure vertex attributes
 
     unsigned int VBO1, VAO1, EBO1;
     unsigned int VBO2, VAO2, EBO2;
@@ -83,11 +77,11 @@ int main()
     const int Y_SEGMENTS = 100;
     const int X_SEGMENTS = 100;
 
+    // Left sphere
     {
         std::vector<float> sphereVertices;
         std::vector<int> sphereIndices;
 
-        /*2-Calculate the vertices of the sphere*/
         //Generate the vertices of the ball
         for (int y = 0; y <= Y_SEGMENTS; y++)
         {
@@ -131,7 +125,7 @@ int main()
         glGenVertexArrays(1, &VAO1);
         glGenBuffers(1, &VBO1);
         glGenBuffers(1, &EBO1);
-        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+        // binding the Vertex Array Object, then binding and setting vertex buffers, and then configuring vertex attributes.
         glBindVertexArray(VAO1);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO1);
@@ -148,11 +142,11 @@ int main()
         glEnableVertexAttribArray(1);
 
     }
+    // Right sphere
     {
         std::vector<float> sphereVertices;
         std::vector<int> sphereIndices;
 
-        /*2-Calculate the vertices of the sphere*/
         //Generate the vertices of the ball
         for (int y = 0; y <= Y_SEGMENTS; y++)
         {
@@ -165,10 +159,10 @@ int main()
                 float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 
                 float zn = ySegment;
-
-                sphereVertices.push_back(xPos);
-                sphereVertices.push_back(yPos);
-                sphereVertices.push_back(zPos);
+                float scale = 1.25;
+                sphereVertices.push_back(scale * xPos);
+                sphereVertices.push_back(scale * yPos);
+                sphereVertices.push_back(scale * zPos);
 
                 sphereVertices.push_back(1);
                 sphereVertices.push_back(1 - zn);
@@ -196,7 +190,7 @@ int main()
         glGenVertexArrays(1, &VAO2);
         glGenBuffers(1, &VBO2);
         glGenBuffers(1, &EBO2);
-        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+        // binding the Vertex Array Object, then binding and setting vertex buffers, and then configuring vertex attributes.
         glBindVertexArray(VAO2);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO2);
@@ -219,30 +213,24 @@ int main()
 
 
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
-        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         // input
-        // -----
         processInput(window);
 
         // render
-        // ------
         glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // bind textures on corresponding texture units
-
-        // activate shader
+        // activating shader
         ourShader.use();
 
-        // pass projection matrix to shader (note that in this case it could change every frame)
+        // passing projection matrix to shader 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
 
@@ -250,34 +238,32 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("view", view);
 
-        // render boxes
+        // rendering spheres
         glBindVertexArray(VAO1);
 
         float distance = 8.0f;
-        // calculate the model matrix for each object and pass it to shader before drawing
-        glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        // calculating the model matrix for each object and passing it to shader before drawing
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-distance / 4, 0, -distance));
         ourShader.setMat4("model", model);
         glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
 
 
         glBindVertexArray(VAO2);
-        // calculate the model matrix for each object and pass it to shader before drawing
-        model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        // calculating the model matrix for each object and passing it to shader before drawing
+        model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(distance / 4, 0, -distance));
         ourShader.setMat4("model", model);
         glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0);
 
         
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
+        // Swaping buffers and polling IO events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
+    // De-allocating all resources
     glDeleteVertexArrays(1, &VAO1);
     glDeleteBuffers(1, &VBO1);
     glDeleteBuffers(1, &EBO1);
@@ -286,14 +272,11 @@ int main()
     glDeleteBuffers(1, &VBO2);
     glDeleteBuffers(1, &EBO2);
 
-    // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
+// processing all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -310,17 +293,13 @@ void processInput(GLFWwindow* window)
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
 
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -331,7 +310,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos; // reversed since y-coordinates to go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
@@ -340,7 +319,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
