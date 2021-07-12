@@ -1,4 +1,6 @@
 # openGL-MC2
 
-Mehrshad Mirmohammadi - 98109634
-Ghazal Shenavar - 97101897
+|         name            | student number |
+|-------------------------|----------------|
+|  Mehrshad Mirmohammadi  |   98109634     |
+|  Ghazal Shenavar        |   97101897     |
