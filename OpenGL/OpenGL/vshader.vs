@@ -12,5 +12,5 @@ uniform mat4 projection;
 void main()
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0f);
-    ourColor = aColor * (0.1f + 1 * max(dot(normalize(vec3(1.0f, 1.0f, 1.0f)), aPos), 0.0));
+    ourColor = aColor * (0.1f + 1 * max(dot(normalize(vec3(1.0f, 1.0f, 1.0f)), normalize(aPos)), 0.0));
 }
